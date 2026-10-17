@@ -1,0 +1,285 @@
+/* #03 | /root/css/a.css | v 2.2 | u 10/09/2026 • 20:30:00 | xu : ke-4 | note : #noteresponse
+- ADDITIVE: style baru untuk SUB-MENU NESTED di sidebar (Manage Soal).
+  Parent nav-item bisa expand/collapse dengan chevron berputar; sub-item muncul
+  di bawah dengan indent + tree-line visual + ikon kecil.
+  * .nav-item.has-sub: parent dengan chevron di kanan.
+  * .nav-item.has-sub .nav-chevron: icon chevron berputar 90° saat expanded.
+  * .nav-submenu: container sub-item (default hidden, jadi grid saat expanded).
+  * .nav-sub-item: item nested (indent + font lebih kecil + ikon lebih kecil).
+  * .nav-sub-item.active: state active sub-item (emerald soft + border kiri).
+- Responsive mobile: sub-menu ikut collapse saat sidebar tertutup (tidak perlu
+  rule khusus, karena .sidebar translateX(-100%) sudah handle ini).
+- Warna brand emerald (#10b981, #047857, #ecfdf5) konsisten dengan v2.1.
+- TETAP IDENTIK (tidak dipotong dari v2.1): layout, sidebar existing, stats, cards,
+  tabs, student grid, question type, session card, live monitoring, activity list,
+  score circle, feedback, responsive breakpoints. */
+
+/* ============================================
+   LAYOUT ADMIN
+   ============================================ */
+.app-layout{display:flex;min-height:100vh;padding-top:56px}
+.main-content{flex:1;padding:1.5rem;overflow-x:hidden}
+.page-content{display:none;animation:fadeIn .3s}
+.page-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.page-title{font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.page-title .material-icons{color:#10b981}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.sidebar{position:fixed;top:56px;left:0;bottom:0;width:240px;background:#fff;border-right:1px solid #e2e8f0;overflow-y:auto;transform:translateX(-100%);transition:transform .3s;z-index:99}
+.sidebar.active{transform:translateX(0)}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;color:#475569;cursor:pointer;border-left:3px solid transparent;font-size:.875rem;transition:all .15s;text-decoration:none}
+.nav-item:hover{background:#ecfdf5;color:#047857}
+.nav-item.active{background:#ecfdf5;color:#047857;border-left-color:#10b981;font-weight:600}
+.nav-item .material-icons{font-size:20px}
+.nav-badge{margin-left:auto;background:#10b981;color:#fff;font-size:.7rem;padding:.125rem .5rem;border-radius:50px}
+.nav-section{padding:.5rem 1rem;font-size:.7rem;font-weight:600;text-transform:uppercase;color:#94a3b8;margin-top:.5rem}
+
+/* ============================================
+   SUB-MENU SIDEBAR (Manage Soal) - ADDITIVE v2.2
+   ============================================ */
+/* Parent nav-item dengan chevron */
+.nav-item.has-sub{position:relative}
+.nav-item.has-sub .nav-chevron{
+  margin-left:auto;
+  font-size:18px;
+  color:#94a3b8;
+  transition:transform .2s ease;
+  flex-shrink:0;
+}
+.nav-item.has-sub[data-expanded="true"] .nav-chevron{
+  transform:rotate(90deg);
+  color:#10b981;
+}
+
+/* Saat expanded, parent tetap highlighted (tapi tidak se-active active state) */
+.nav-item.has-sub[data-expanded="true"]{
+  background:#f8fafc;
+  color:#047857;
+  border-left-color:#34d399;
+}
+
+/* Container sub-menu */
+.nav-submenu{
+  display:none;
+  background:#f8fafc;
+  padding:.25rem 0 .5rem 0;
+  border-left:2px solid #e2e8f0;
+  margin-left:1rem;
+  position:relative;
+}
+.nav-submenu.active{
+  display:block;
+  animation:navSubIn .2s ease;
+}
+@keyframes navSubIn{
+  from{opacity:0;transform:translateY(-4px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* Tree-line indicator (garis vertikal di kiri sub-menu) */
+.nav-submenu::before{
+  content:'';
+  position:absolute;
+  left:-2px;
+  top:0;
+  bottom:0;
+  width:2px;
+  background:linear-gradient(180deg, #34d399 0%, #d1fae5 100%);
+}
+
+/* Item sub-menu */
+.nav-sub-item{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  padding:.5rem .75rem .5rem 1rem;
+  color:#64748b;
+  cursor:pointer;
+  font-size:.8125rem;
+  transition:all .15s;
+  text-decoration:none;
+  border-left:2px solid transparent;
+  margin-left:-2px;
+}
+.nav-sub-item:hover{
+  background:#ecfdf5;
+  color:#047857;
+}
+.nav-sub-item.active{
+  background:#ecfdf5;
+  color:#047857;
+  border-left-color:#10b981;
+  font-weight:600;
+}
+.nav-sub-item .material-icons{
+  font-size:16px;
+  color:#94a3b8;
+}
+.nav-sub-item.active .material-icons{
+  color:#10b981;
+}
+.nav-sub-item .sub-badge{
+  margin-left:auto;
+  background:#f59e0b;
+  color:#fff;
+  font-size:.6rem;
+  padding:1px 5px;
+  border-radius:50px;
+  font-weight:700;
+}
+
+/* Divider di dalam sub-menu (opsional, untuk kelompok sub-item) */
+.nav-sub-divider{
+  height:1px;
+  background:#e2e8f0;
+  margin:.375rem 1rem;
+}
+
+/* ============================================
+   STATS
+   ============================================ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e2e8f0;display:flex;align-items:center;gap:1rem}
+.stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.stat-icon.primary{background:#d1fae5;color:#047857}
+.stat-icon.success{background:#d1fae5;color:#10b981}
+.stat-icon.warning{background:#fef3c7;color:#f59e0b}
+.stat-icon.info{background:#cffafe;color:#0891b2}
+.stat-icon.error{background:#fee2e2;color:#ef4444}
+.stat-info h3{font-size:1.5rem;font-weight:700;margin-bottom:.125rem}
+.stat-info p{font-size:.75rem;color:#64748b}
+
+/* ============================================
+   CARDS & TABS
+   ============================================ */
+.card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:1rem;overflow:hidden}
+.card-header{padding:1rem 1.25rem;border-bottom:1px solid #e2e8f0}
+.card-title{font-size:1rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.card-title .material-icons{color:#10b981}
+.card-body{padding:1.25rem}
+.tabs{display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:1rem;overflow-x:auto}
+.tab{padding:.75rem 1rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;font-size:.875rem;font-weight:600;color:#64748b;display:flex;align-items:center;gap:.5rem;white-space:nowrap}
+.tab:hover{color:#047857}
+.tab.active{color:#047857;border-bottom-color:#10b981}
+.tab .material-icons{font-size:18px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ============================================
+   STUDENT GRID
+   ============================================ */
+.student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+.student-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:1rem;transition:all .2s}
+.student-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.student-card-id{font-weight:700;font-family:monospace;color:#047857;font-size:1.125rem}
+.student-card-name{font-size:.875rem;color:#475569;margin:.25rem 0}
+.student-card-actions{display:flex;gap:.375rem;margin-top:.75rem;flex-wrap:wrap}
+
+/* ============================================
+   QUESTION TYPE SELECTOR
+   ============================================ */
+.question-type-selector{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.question-type-btn{padding:1rem;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .15s}
+.question-type-btn:hover{border-color:#10b981}
+.question-type-btn.active{border-color:#10b981;background:#ecfdf5}
+.question-type-btn .material-icons{font-size:32px;color:#10b981;display:block;margin-bottom:.5rem}
+.question-type-btn h4{font-size:.875rem;margin:.25rem 0}
+.question-type-btn p{font-size:.7rem;color:#94a3b8;margin:0}
+.option-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;padding:.5rem;background:#f8fafc;border-radius:8px}
+.option-row input[type="radio"],.option-row input[type="checkbox"]{width:20px;height:20px;accent-color:#10b981}
+.question-type-badge{font-size:.65rem;font-weight:700;padding:.125rem .5rem;border-radius:50px;text-transform:uppercase}
+.question-type-badge.pgs{background:#dbeafe;color:#1e40af}
+.question-type-badge.mcma{background:#fef3c7;color:#92400e}
+.question-type-badge.pgk{background:#cffafe;color:#155e75}
+.question-type-badge.isian{background:#d1fae5;color:#065f46}
+
+/* ============================================
+   SESSION CARD
+   ============================================ */
+.session-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:1.25rem;margin-bottom:1rem}
+.session-card-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
+.session-card-title{font-weight:600;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.session-card-title .material-icons{color:#10b981}
+.session-card-actions{display:flex;gap:.375rem;align-items:center}
+.session-card-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid #e2e8f0;font-size:.8125rem;color:#64748b}
+.session-meta-item{display:flex;align-items:center;gap:.25rem}
+.session-meta-item .material-icons{font-size:16px}
+
+/* ============================================
+   LIVE MONITORING
+   ============================================ */
+.monitoring-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.monitor-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden}
+.monitor-card-header{padding:.75rem 1rem;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0}
+.monitor-card-body{padding:1rem}
+.progress-bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:.5rem 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,#10b981,#34d399);transition:width .3s}
+.anti-cheat-badge{display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .5rem;border-radius:50px;font-size:.7rem;font-weight:600}
+.anti-cheat-badge.clean{background:#d1fae5;color:#065f46}
+.anti-cheat-badge.warning{background:#fef3c7;color:#92400e}
+.anti-cheat-badge.danger{background:#fee2e2;color:#991b1b}
+.anti-cheat-badge .material-icons{font-size:14px}
+
+/* ============================================
+   ACTIVITY LIST
+   ============================================ */
+.activity-list{list-style:none}
+.activity-item{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem 0;border-bottom:1px solid #e2e8f0}
+.activity-item:last-child{border-bottom:none}
+.activity-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ecfdf5;color:#047857;font-size:18px;flex-shrink:0}
+.activity-text{flex:1;font-size:.8125rem;line-height:1.5}
+.activity-time{font-size:.7rem;color:#94a3b8;margin-top:.125rem}
+
+/* ============================================
+   SCORE CIRCLE (Review)
+   ============================================ */
+.score-circle{width:150px;height:150px;border-radius:50%;border:10px solid #10b981;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.score-circle-value{font-size:2.5rem;font-weight:700;color:#10b981}
+
+/* ============================================
+   FEEDBACK
+   ============================================ */
+.feedback-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:1rem;margin-bottom:.75rem;border-left:4px solid #e2e8f0}
+.feedback-card.baru{border-left-color:#f59e0b}
+.feedback-card.resolved{border-left-color:#10b981;opacity:.75}
+.feedback-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.feedback-meta{font-size:.75rem;color:#64748b;display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:.5rem}
+.feedback-meta span{display:flex;align-items:center;gap:.25rem}
+.feedback-meta .material-icons{font-size:14px}
+.feedback-msg{font-size:.875rem;color:#1e293b;background:#f8fafc;padding:.75rem;border-radius:8px;margin-bottom:.75rem;white-space:pre-wrap}
+.feedback-actions{display:flex;gap:.375rem;flex-wrap:wrap}
+.fb-type{font-size:.65rem;font-weight:700;padding:.2rem .5rem;border-radius:50px;text-transform:uppercase}
+.fb-type.keliru{background:#fee2e2;color:#991b1b}
+.fb-type.salah{background:#fef3c7;color:#92400e}
+.fb-type.kritik{background:#cffafe;color:#155e75}
+.fb-type.saran{background:#dbeafe;color:#1e40af}
+
+/* ============================================
+   MODE BADGE (Manage Sesi)
+   ============================================ */
+.mode-badge-live{display:inline-flex;align-items:center;gap:.2rem;background:#dbeafe;color:#1e40af;font-size:.65rem;font-weight:700;padding:.125rem .5rem;border-radius:50px}
+.mode-badge-hw{display:inline-flex;align-items:center;gap:.2rem;background:#fef3c7;color:#92400e;font-size:.65rem;font-weight:700;padding:.125rem .5rem;border-radius:50px}
+.hw-retry-badge{display:inline-flex;align-items:center;gap:.125rem;background:#ede9fe;color:#5b21b6;font-size:.6rem;font-weight:700;padding:.0625rem .375rem;border-radius:50px}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (min-width:768px){
+  .sidebar{transform:translateX(0)}
+  .main-content{margin-left:240px}
+  #menuToggle{display:none}
+}
+@media (max-width:767px){
+  .main-content{padding:1rem}
+  body.sidebar-open::before{content:'';position:fixed;inset:56px 0 0;background:rgba(0,0,0,.5);z-index:98}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:.75rem}
+  .stat-card{padding:1rem;gap:.75rem}
+  .stat-icon{width:40px;height:40px;font-size:20px}
+  .stat-info h3{font-size:1.25rem}
+  /* Sub-menu di mobile: font sedikit lebih kecil agar muat */
+  .nav-sub-item{padding:.375rem .75rem .375rem 1rem;font-size:.8rem;}
+}

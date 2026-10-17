@@ -1,0 +1,136 @@
+/* #04 | /root/css/g.css | v 2.1 | u 08/09/2026 • 00:05:00 | xu : ke-3 | note : #noteresponse
+- TAMBAH animasi header-brand: "JEC" -> "Jagat Education Center" (one-time).
+- Variasi LOOP tersedia (commented) di bagian bawah, tinggal aktifkan.
+- Semua style global lain TIDAK diubah. */
+
+/* ===== RESET & BASE ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:#f8fafc;color:#1e293b;font-size:14px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+a{color:#2563eb;text-decoration:none}
+h1,h2,h3,h4{color:#1e293b}
+.material-icons{user-select:none}
+
+/* ===== LOGIN ===== */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);padding:1rem}
+.login-card{background:#fff;border-radius:16px;width:100%;max-width:400px;padding:2rem;box-shadow:0 20px 40px rgba(0,0,0,.15)}
+.login-logo{text-align:center;margin-bottom:1.5rem}
+.login-logo .material-icons{font-size:48px;color:#2563eb;background:#eff6ff;width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.login-logo h1{font-size:1.5rem;margin-bottom:.25rem}
+.login-logo p{font-size:.875rem;color:#64748b}
+.login-footer{text-align:center;margin-top:1.5rem;font-size:.75rem;color:#94a3b8}
+.err{background:#fee2e2;color:#991b1b;padding:.75rem;border-radius:8px;margin-bottom:1rem;font-size:.8125rem;display:none}
+
+/* ===== FORMS ===== */
+.form-group{margin-bottom:1rem}
+.form-label{display:flex;align-items:center;gap:.375rem;font-size:.875rem;font-weight:600;color:#475569;margin-bottom:.5rem}
+.form-label .material-icons{font-size:16px;color:#2563eb}
+.form-control{width:100%;padding:.75rem 1rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.875rem;font-family:inherit;transition:all .15s;background:#fff;color:#1e293b}
+.form-control:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea.form-control{resize:vertical}
+.checkbox-wrapper{display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.875rem}
+.checkbox-wrapper input{width:18px;height:18px;accent-color:#2563eb}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border:none;border-radius:8px;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn .material-icons{font-size:18px}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-primary:hover:not(:disabled){background:#1d4ed8}
+.btn-secondary{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
+.btn-secondary:hover{background:#e2e8f0}
+.btn-success{background:#10b981;color:#fff}
+.btn-error{background:#ef4444;color:#fff}
+.btn-warning{background:#f59e0b;color:#fff}
+.btn-sm{padding:.375rem .875rem;font-size:.75rem}
+.btn-sm .material-icons{font-size:16px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.w-full{width:100%}
+
+/* ===== TOGGLE ===== */
+.toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#e2e8f0;border-radius:12px;transition:.2s}
+.toggle-slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{background:#2563eb}
+.toggle input:checked+.toggle-slider:before{transform:translateX(20px)}
+
+/* ===== BADGE & PILLS ===== */
+.badge{display:inline-flex;align-items:center;padding:.125rem .5rem;border-radius:50px;font-size:.7rem;font-weight:600}
+.badge-success{background:#d1fae5;color:#065f46}
+.badge-error{background:#fee2e2;color:#991b1b}
+.badge-info{background:#dbeafe;color:#1e40af}
+.badge-warning{background:#fef3c7;color:#92400e}
+.pills{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.pill{padding:.5rem 1rem;border-radius:50px;font-size:.8125rem;font-weight:600;cursor:pointer;background:#f1f5f9;color:#475569;border:1.5px solid transparent;display:inline-flex;align-items:center;gap:.375rem}
+.pill.active{background:#2563eb;color:#fff}
+.pill .material-icons{font-size:16px}
+
+/* ===== TABLE ===== */
+.table-wrapper{overflow-x:auto}
+.table{width:100%;border-collapse:collapse}
+.table th{padding:.75rem 1rem;text-align:left;background:#f8fafc;font-size:.75rem;font-weight:600;color:#64748b;text-transform:uppercase;border-bottom:1px solid #e2e8f0}
+.table td{padding:.75rem 1rem;border-bottom:1px solid #e2e8f0;font-size:.875rem}
+.table tbody tr:hover{background:#f8fafc}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:3rem 1rem;color:#94a3b8}
+.empty-state .material-icons{font-size:48px;margin-bottom:.5rem;opacity:.5;display:block}
+
+/* ===== APP HEADER ===== */
+.app-header{position:fixed;top:0;left:0;right:0;height:56px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;z-index:100;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.header-datetime{display:none;align-items:center;gap:.5rem;font-size:.8125rem;color:#475569;background:#f1f5f9;padding:.375rem .875rem;border-radius:8px;font-family:monospace}
+.header-datetime .material-icons{font-size:15px;color:#2563eb}
+.hd-divider{color:#94a3b8}
+.header-right{display:flex;align-items:center;gap:.5rem}
+.header-user{display:flex;align-items:center;gap:.5rem;font-size:.8125rem;background:#f1f5f9;padding:.375rem .75rem;border-radius:8px}
+.header-user strong{color:#2563eb;font-family:monospace}
+.header-user .material-icons{font-size:18px;color:#2563eb}
+.header-name{color:#475569;font-weight:500}
+.menu-toggle{width:40px;height:40px;border:none;background:transparent;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#475569}
+.menu-toggle:hover{background:#f1f5f9}
+@media (min-width:768px){ .header-datetime{display:flex} }
+@media (max-width:767px){ .header-name{display:none} }
+
+/* ===== HEADER BRAND + ANIMASI (JEC -> Jagat Education Center) ===== */
+.header-brand{display:inline-flex;align-items:center;gap:.5rem;font-weight:700;color:#2563eb;font-size:1rem;position:relative;overflow:hidden;cursor:default}
+.header-brand .material-icons{flex-shrink:0;animation:hbIconPop .6s ease .2s}
+.header-brand .hb-wrap{display:inline-flex;position:relative;min-width:3ch}
+.header-brand .hb-short,.header-brand .hb-long{display:inline-block;white-space:nowrap}
+/* "JEC" tampil dulu, lalu fade-out */
+/*.header-brand .hb-short{animation:hbFadeOut .6s ease 2s forwards}
+/* "Jagat Education Center" fade-in setelahnya, lalu diam */
+/*.header-brand .hb-long{position:absolute;left:0;top:0;opacity:0;transform:translateX(-8px);animation:hbFadeIn .7s ease 2.2s forwards} */
+@keyframes hbFadeOut{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(8px)}}
+@keyframes hbFadeIn{0%{opacity:0;transform:translateX(-8px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes hbIconPop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* ===== VARIASI LOOP (opsional) =====*/
+   Hapus/replace 2 baris animation .hb-short & .hb-long di atas
+   dengan blok di bawah agar JEC <-> Jagat Education Center berulang.
+.header-brand .hb-short{animation:hbLoopShort 6s ease infinite}
+.header-brand .hb-long{animation:hbLoopLong 6s ease infinite}
+@keyframes hbLoopShort{0%,40%{opacity:1;transform:translateX(0)}50%,90%{opacity:0;transform:translateX(8px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes hbLoopLong{0%,40%{opacity:0;transform:translateX(-8px)}50%,90%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(-8px)}}
+/*===== akhir variasi loop ===== */
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:1rem;z-index:1000;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal-box{background:#fff;border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-header{padding:1.25rem 1.25rem .5rem;display:flex;align-items:center;gap:.75rem}
+.modal-icon{font-size:32px}
+.modal-icon.info{color:#0891b2}
+.modal-icon.success{color:#10b981}
+.modal-icon.error{color:#ef4444}
+.modal-icon.warning{color:#f59e0b}
+.modal-title{font-size:1.125rem;font-weight:700}
+.modal-content{padding:.5rem 1.25rem 1rem}
+.modal-message{font-size:.875rem;color:#475569;line-height:1.6}
+.modal-actions{padding:.75rem 1.25rem 1.25rem;display:flex;gap:.5rem;justify-content:flex-end;border-top:1px solid #e2e8f0}
+
+/* ===== TOAST & SPINNER ===== */
+.toast{position:fixed;top:70px;right:1rem;padding:.75rem 1.25rem;border-radius:8px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.15);display:flex;align-items:center;gap:.5rem;transform:translateX(120%);transition:transform .3s;z-index:2000;font-size:.875rem;border-left:4px solid #2563eb}
+.toast.show{transform:translateX(0)}
+.toast.success{border-left-color:#10b981}
+.toast.error{border-left-color:#ef4444}
+.toast.warning{border-left-color:#f59e0b}
+.spinner{width:18px;height:18px;border:2px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
