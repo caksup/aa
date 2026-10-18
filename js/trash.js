@@ -1,13 +1,14 @@
-/* #xx | /root/js/trash.js | v 1.1 | u 10/09/2026 • 17:40:00 | xu : ke-2 | note : #noteresponse
-- v1.0 -> v1.1 (PATCH badge sidebar + auto-refresh):
+/* #xx | /root/js/trash.js | v 1.2 | u 18/10/2026 | xu : ke-3 | note : #noteresponse
+- v1.1 -> v1.2 (parallel loads + conditional loading overlay + reliable errors):
   * updateCounts(): sekarang juga update `#badgeTrash` di sidebar dengan total item
     ter-trash di semua collection (supaya admin lihat jumlah sampah tanpa buka menu).
     Badge disembunyikan bila total = 0.
   * softDelete(): memanggil loadTabData(col) + updateCounts() setelah update berhasil,
     sehingga badge sidebar otomatis naik saat modul soal memindahkan item ke Sampah.
     Bila halaman Sampah sedang terbuka, list juga di-refresh otomatis.
-  * Auto-init saat page load: loadAllTabs() + updateCounts() dipanggil sekali setelah
-    DOM ready (delay 500ms), sehingga badge sidebar terisi meski menu Sampah belum dibuka.
+  * Auto-init badge tetap berjalan tanpa overlay; data enam tab diambil paralel.
+  * Overlay "Memuat Sampah..." hanya dipakai saat admin memilih Refresh manual.
+  * Query yang gagal tidak lagi ditampilkan seolah tab kosong; halaman menampilkan error.
 - TETAP IDENTIK (tidak dipotong dari v1.0):
   * TRASH_TABS config (6 tab: questions, questionBank, sessions, attempts, students, feedback)
   * Helper: escT, fmtTs, daysBetween, currentAdminId
@@ -86,7 +87,10 @@ async function softDelete(col, id){
       updateCounts();
       // Bila halaman Sampah sedang terbuka, refresh list juga
       if (window.__trash.activeTab && document.getElementById('trashContent')) render();
-    } catch(e){}
+    } catch(e){
+      console.error('[Trash] Item terhapus tetapi daftar sampah gagal diperbarui:', e);
+      if (window.alert2) alert2('Item dipindahkan','Item sudah masuk Sampah, tetapi daftar gagal diperbarui. Tekan Refresh untuk memuat ulang.','warning');
+    }
     return true;
   } catch(e){
     console.error('[Trash] softDelete error:', e);
@@ -107,14 +111,19 @@ async function restoreItem(col, id){
       deletedBy: null
     });
     if (window.toast) toast('Item dipulihkan','success');
-    await loadTabData(col);
-    render();
-    updateCounts();
-    return true;
   } catch(e){
     if (window.alert2) alert2('Error','Gagal memulihkan: '+e.message,'error');
     return false;
   }
+  try {
+    await loadTabData(col);
+    render();
+    updateCounts();
+  } catch(e){
+    console.error('[Trash] Item dipulihkan tetapi daftar gagal diperbarui:', e);
+    if (window.alert2) alert2('Item dipulihkan','Item sudah dipulihkan, tetapi daftar gagal diperbarui. Tekan Refresh untuk memuat ulang.','warning');
+  }
+  return true;
 }
 
 // ============================================
@@ -132,11 +141,17 @@ function purgeItem(col, id, label){
     try {
       await db.collection(col).doc(id).delete();
       if (window.toast) toast('Item dihapus permanen','success');
+    } catch(e){
+      if (window.alert2) alert2('Error','Gagal hapus permanen: '+e.message,'error');
+      return;
+    }
+    try {
       await loadTabData(col);
       render();
       updateCounts();
     } catch(e){
-      if (window.alert2) alert2('Error','Gagal hapus permanen: '+e.message,'error');
+      console.error('[Trash] Item dihapus permanen tetapi daftar gagal diperbarui:', e);
+      if (window.alert2) alert2('Item dihapus','Item sudah dihapus permanen, tetapi daftar gagal diperbarui. Tekan Refresh untuk memuat ulang.','warning');
     }
   })();
 }
@@ -145,33 +160,29 @@ function purgeItem(col, id, label){
 // LOAD DATA PER TAB
 // ============================================
 async function loadTabData(col){
-  try {
-    var snap = await db.collection(col).where('deleted','==',true).get();
-    window.__trash.data[col] = [];
-    snap.forEach(function(d){
-      window.__trash.data[col].push(Object.assign({id:d.id}, d.data()));
-    });
-    window.__trash.data[col].sort(function(a,b){
-      var ta = 0, tb = 0;
-      try{ if(a.deletedAt && a.deletedAt.toDate) ta = a.deletedAt.toDate().getTime(); }catch(e){}
-      try{ if(b.deletedAt && b.deletedAt.toDate) tb = b.deletedAt.toDate().getTime(); }catch(e){}
-      return tb - ta;
-    });
-    window.__trash.counts[col] = window.__trash.data[col].length;
-  } catch(e){
-    console.warn('[Trash] loadTabData error for', col, e);
-    window.__trash.data[col] = [];
-    window.__trash.counts[col] = 0;
-  }
+  var snap = await db.collection(col).where('deleted','==',true).get();
+  var items = [];
+  snap.forEach(function(d){
+    items.push(Object.assign({id:d.id}, d.data()));
+  });
+  items.sort(function(a,b){
+    var ta = 0, tb = 0;
+    try{ if(a.deletedAt && a.deletedAt.toDate) ta = a.deletedAt.toDate().getTime(); }catch(e){}
+    try{ if(b.deletedAt && b.deletedAt.toDate) tb = b.deletedAt.toDate().getTime(); }catch(e){}
+    return tb - ta;
+  });
+  window.__trash.data[col] = items;
+  window.__trash.counts[col] = items.length;
 }
 
-async function loadAllTabs(){
+async function loadAllTabs(showLoading){
   var ld = null;
-  if (window.loading) ld = window.loading('Memuat Sampah...');
-  for (var i=0; i<TRASH_TABS.length; i++){
-    await loadTabData(TRASH_TABS[i].col);
+  if (showLoading && window.loading) ld = window.loading('Memuat Sampah...');
+  try {
+    await Promise.all(TRASH_TABS.map(function(tab){ return loadTabData(tab.col); }));
+  } finally {
+    if (ld) ld.close();
   }
-  if (ld) ld.close();
 }
 
 // ============================================
@@ -349,17 +360,23 @@ function bulkPurgePrompt(col){
       (async function(){
         var ld = window.loading ? window.loading('Purge '+targets.length+' item...') : null;
         var ok = 0, fail = 0;
-        for (var i=0; i<targets.length; i++){
-          try {
-            await db.collection(col).doc(targets[i].id).delete();
-            ok++;
-          } catch(e){ fail++; }
+        try {
+          for (var i=0; i<targets.length; i++){
+            try {
+              await db.collection(col).doc(targets[i].id).delete();
+              ok++;
+            } catch(e){ fail++; }
+          }
+          if (window.alert2) alert2('Selesai', ok + ' item dipurge, ' + fail + ' gagal.', fail ? 'warning' : 'success');
+          await loadTabData(col);
+          render();
+          updateCounts();
+        } catch(e){
+          console.error('[Trash] Gagal memperbarui setelah purge:', e);
+          if (window.alert2) alert2('Purge selesai, refresh gagal', ok + ' item dihapus, ' + fail + ' gagal. Daftar belum dapat dimuat ulang: ' + e.message, 'warning');
+        } finally {
+          if (ld) ld.close();
         }
-        if (ld) ld.close();
-        if (window.alert2) alert2('Selesai', ok + ' item dipurge, ' + fail + ' gagal.', fail ? 'warning' : 'success');
-        await loadTabData(col);
-        render();
-        updateCounts();
       })();
     });
 }
@@ -530,18 +547,53 @@ async function moveAllFindings(){
   if (!findings.length) return;
   if (!confirm('Pindahkan '+findings.length+' item ke Sampah?')) return;
   var ld = window.loading ? window.loading('Memindahkan...') : null;
-  var ok = 0, fail = 0;
-  for (var i=0; i<findings.length; i++){
-    var r = await softDelete(findings[i].col, findings[i].id);
-    if (r) ok++; else fail++;
+  var moved = {};
+  var fail = 0;
+  try {
+    var groups = {};
+    findings.forEach(function(finding){
+      if (!groups[finding.col]) groups[finding.col] = [];
+      groups[finding.col].push(finding);
+    });
+    var cols = Object.keys(groups);
+    for (var c=0; c<cols.length; c++){
+      var col = cols[c];
+      var group = groups[col];
+      for (var offset=0; offset<group.length; offset+=450){
+        var chunk = group.slice(offset, offset+450);
+        var batch = db.batch();
+        chunk.forEach(function(finding){
+          batch.update(db.collection(col).doc(finding.id), {
+            deleted:true,
+            deletedAt:firebase.firestore.FieldValue.serverTimestamp(),
+            deletedBy:currentAdminId(),
+            deletedFrom:col
+          });
+        });
+        try {
+          await batch.commit();
+          chunk.forEach(function(finding){ moved[col+'|'+finding.id] = true; });
+        } catch(error){
+          fail += chunk.length;
+          console.error('[Trash] Gagal memindahkan batch temuan:', col, error);
+        }
+      }
+    }
+    var ok = Object.keys(moved).length;
+    if (window.alert2) alert2('Selesai', ok+' dipindahkan, '+fail+' gagal', fail?'warning':'success');
+    window.__trash.__lastFindings = findings.filter(function(finding){
+      return !moved[finding.col+'|'+finding.id];
+    });
+    renderScannerResult(window.__trash.__lastFindings);
+    await loadAllTabs();
+    render();
+    updateCounts();
+  } catch(error){
+    console.error('[Trash] Gagal menyegarkan setelah pindah massal:', error);
+    if (window.alert2) alert2('Data dipindahkan, refresh gagal', Object.keys(moved).length+' dipindahkan, '+fail+' gagal. Daftar belum dapat dimuat ulang: '+error.message, 'warning');
+  } finally {
+    if (ld) ld.close();
   }
-  if (ld) ld.close();
-  if (window.alert2) alert2('Selesai', ok+' dipindahkan, '+fail+' gagal', fail?'warning':'success');
-  window.__trash.__lastFindings = [];
-  renderScannerResult([]);
-  await loadAllTabs();
-  render();
-  updateCounts();
 }
 
 window.Trash.scan = scanTrash;
@@ -563,17 +615,21 @@ async function initTrash(){
     for (var i=0; i<TRASH_TABS.length; i++){
       var tab = TRASH_TABS[i];
       var snap = await db.collection(tab.col).get();
-      var batch = db.batch();
-      var n = 0;
+      var refs = [];
       snap.forEach(function(d){
         var data = d.data();
         if (typeof data.deleted === 'undefined') {
-          batch.update(d.ref, { deleted: false });
-          n++;
+          refs.push(d.ref);
         }
       });
-      if (n > 0) await batch.commit();
-      stats[tab.col] = n;
+      for (var offset=0; offset<refs.length; offset+=450) {
+        var batch = db.batch();
+        refs.slice(offset, offset+450).forEach(function(ref){
+          batch.update(ref, { deleted: false });
+        });
+        await batch.commit();
+      }
+      stats[tab.col] = refs.length;
     }
     if (ld) ld.close();
     var msg = Object.keys(stats).map(function(k){ return k + ': ' + stats[k]; }).join('\n');
@@ -631,7 +687,12 @@ function ensureTrashPage(){
 }
 
 async function openTrash(){
-  ensureTrashPage();
+  var page = ensureTrashPage();
+  if (!page) {
+    console.error('[Trash] Halaman Sampah tidak dapat dibuat: .main-content tidak ditemukan.');
+    if (window.alert2) alert2('Sampah tidak tersedia','Kontainer halaman admin tidak ditemukan. Muat ulang panel admin lalu coba lagi.','error');
+    return;
+  }
   if (window.S && typeof S.setPage === 'function') {
     S.setPage('trash');
   } else {
@@ -641,8 +702,17 @@ async function openTrash(){
     if (target) target.classList.add('active');
   }
   if (!window.__trash.initialized) {
-    await loadAllTabs();
-    window.__trash.initialized = true;
+    var container = document.getElementById('trashContent');
+    if (container) container.innerHTML = '<div class="empty-state" style="padding:1rem;"><span class="material-icons">hourglass_empty</span><p>Memuat daftar sampah...</p></div>';
+    try {
+      await loadAllTabs();
+      window.__trash.initialized = true;
+    } catch(error) {
+      console.error('[Trash] Gagal memuat daftar sampah:', error);
+      if (container) container.innerHTML = '<div class="empty-state" style="padding:1rem;color:#b91c1c;"><span class="material-icons">error_outline</span><p>Daftar sampah gagal dimuat. Periksa koneksi/akses lalu tekan Refresh.</p></div>';
+      if (window.alert2) alert2('Gagal memuat Sampah', error.message || 'Periksa koneksi dan izin akses Firestore.', 'error');
+      return;
+    }
   }
   render();
   updateCounts();
@@ -651,9 +721,18 @@ window.openTrash = openTrash;
 window.Trash.open = openTrash;
 
 async function load(){
-  await loadAllTabs();
-  render();
-  updateCounts();
+  var container = document.getElementById('trashContent');
+  if (container) container.innerHTML = '<div class="empty-state" style="padding:1rem;"><span class="material-icons">hourglass_empty</span><p>Memuat daftar sampah...</p></div>';
+  try {
+    await loadAllTabs(true);
+    window.__trash.initialized = true;
+    render();
+    updateCounts();
+  } catch(error) {
+    console.error('[Trash] Refresh gagal:', error);
+    if (container) container.innerHTML = '<div class="empty-state" style="padding:1rem;color:#b91c1c;"><span class="material-icons">error_outline</span><p>Refresh gagal. Periksa koneksi/akses lalu coba lagi.</p></div>';
+    if (window.alert2) alert2('Refresh Sampah gagal', error.message || 'Periksa koneksi dan izin akses Firestore.', 'error');
+  }
 }
 window.loadTrash = load;
 window.Trash.load = load;
@@ -669,7 +748,10 @@ window.Trash.purge = purgeItem;
 (function(){
   function init(){
     if (typeof db === 'undefined') { setTimeout(init, 300); return; }
-    loadAllTabs().then(function(){ updateCounts(); }).catch(function(){});
+    loadAllTabs().then(function(){ updateCounts(); }).catch(function(error){
+      console.error('[Trash] Gagal memperbarui badge saat startup:', error);
+      updateCounts();
+    });
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function(){ setTimeout(init, 500); });
@@ -678,4 +760,4 @@ window.Trash.purge = purgeItem;
   }
 })();
 
-console.log('✅ trash.js v1.1 loaded (with sidebar badge auto-update)');
+console.log('✅ trash.js v1.2 loaded (parallel loading, conditional overlay, error reporting)');
