@@ -1,9 +1,11 @@
-/* a#13 | /root/js/m-sesi-modal.js | v 1.3 | u 17/10/2026 • 17:00:00 | xu : ke-4 | note : #noteresponse
-- v1.2 -> v1.3:
+/* a#13 | /root/js/m-sesi-modal.js | v 1.4 | u 18/10/2026 | xu : ke-5 | note : #noteresponse
+- v1.3 -> v1.4:
   * Jangan kirim FieldValue.delete() saat membuat sesi baru; Firestore hanya
     mengizinkan sentinel tersebut pada update/merge, bukan add().
+  * UI assignment menjelaskan siswa yang bisa membuka sesi dan efek daftar kosong.
 - v1.1 -> v1.2:
   * Sesi dapat dibuat tanpa assignment siswa; siswa bisa ditambahkan nanti.
+    Sesi tanpa assignment tidak tampil dan tidak bisa dibuka dari panel siswa.
   * Batch/ruang menerima input baru selain pilihan yang sudah tersimpan.
   * Error pemuatan/penyimpanan sesi ditampilkan kepada pengguna.
 - v1.0 -> v1.1 (UPDATE: durasi per soal untuk mode Realtime):
@@ -161,19 +163,20 @@ async function openSessionModal(id, presetMode){
     '</div>'+
     '<div class="form-group"><label class="form-label">Kode Sesi (opsional)</label>'+
       '<input type="text" class="form-control" id="sessCode" value="'+escS(s?s.code:'')+'" placeholder="kosongkan = dibuat otomatis">'+
-      '<small style="color:#64748b;">Link siswa: sp.html?jec-sim-tka=&lt;kode&gt;</small></div>'+
+      '<small style="color:#64748b;">Siswa yang dapat membuka sesi: hanya siswa yang dipilih pada daftar assignment. Link: jagatec.biz.id/s/index.html?jecact=&lt;kode&gt;</small></div>'+
     '<div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-control" id="sessDesc" rows="2">'+escS(s?s.description:'')+'</textarea></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">'+
       '<div class="form-group"><label class="form-label">Mulai</label><input type="datetime-local" class="form-control" id="sessStart" value="'+startVal+'"></div>'+
       '<div class="form-group"><label class="form-label">Selesai / Deadline</label><input type="datetime-local" class="form-control" id="sessEnd" value="'+endVal+'"></div>'+
     '</div>'+
     '<div class="form-group"><label class="form-label">Durasi total (menit)</label><input type="number" class="form-control" id="sessDur" value="'+(s?s.duration||60:60)+'"></div>'+
-    '<div class="form-group"><label class="form-label">Assign Siswa (opsional, bisa ditambahkan nanti)</label>'+
+    '<div class="form-group"><label class="form-label">Assign Siswa (hanya siswa terpilih yang dapat melihat sesi)</label>'+
       '<div style="display:flex;gap:.5rem;margin-bottom:.5rem;">'+
         '<button type="button" class="btn btn-secondary btn-sm" onclick="assignAll(true)">Pilih Semua</button>'+
         '<button type="button" class="btn btn-secondary btn-sm" onclick="assignAll(false)">Kosongkan</button>'+
       '</div>'+
       '<div id="assignBox" style="max-height:180px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem;">'+rows+'</div>'+
+      '<small style="color:#64748b;">Jika tidak ada siswa yang dipilih, sesi tidak akan muncul di panel siswa dan tidak dapat dibuka melalui link.</small>'+
     '</div>'+
     '<div class="form-group"><label class="form-label">Status</label><div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">'+
       '<label class="checkbox-wrapper"><input type="checkbox" id="sessActive" '+(curActive?'checked':'')+'>Aktif</label>'+
