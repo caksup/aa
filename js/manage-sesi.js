@@ -1,4 +1,4 @@
-/* a#20 | /root/js/manage-sesi.js | v 6.0 | u 13/09/2026 • 08:30:00 | xu : ke-12 | note : #noteresponse
+/* a#20 | /root/js/manage-sesi.js | v 6.1 | u 18/10/2026 | xu : ke-13 | note : #noteresponse
 - REFACTOR BESAR (Opsi B): pecah jadi orchestrator + sub-module.
   * File ini SEKARANG HANYA orchestrator (~300 baris): helper shared, state,
     load sessions, accordion OVERVIEW (ringkasan semua batch), routing page,
@@ -24,6 +24,8 @@
     window.copySessionLink, window.gotoSoalSession, window.isSessionDone,
     window.editSession, window.deleteSession, window.__sessAttemptCount,
     window.loadSessions.
+- Link yang disalin selalu mengarah ke https://jagatec.biz.id/s/index.html?jecact=
+  agar sesi dibuka dari panel siswa, bukan dari halaman admin.
 - DATA LAMAN TIDAK DISSENTUH: skema sessions sama; field batch/mode/sourceType
   dsb tetap sama. Tidak ada migrasi.
 - EXPOSE: window.loadSessions, window.loadSessionsForMode, window.editSession,
@@ -47,8 +49,7 @@ function copyTextS(t){
 window.copyTextS = copyTextS;
 
 function sessionLink(code){
-  var base=location.href.split('?')[0].replace(/ap\.html$/,'sp.html');
-  return base+'?jec-sim-tka='+encodeURIComponent(code);
+  return 'https://jagatec.biz.id/s/index.html?jecact='+encodeURIComponent(code);
 }
 window.sessionLink = sessionLink;
 
